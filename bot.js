@@ -10,9 +10,11 @@ logger.level = 'debug';
 
 // IMAGES ARRAYS
 var imagesCute = []; 
+var imagesLoli = []; 
 
 // Rutas de los directorios de las imagenes
 const CuteDir = '../../Imagenes/Cute/';
+const LoliDir = '../../Imagenes/Loli/';
 
 
 // Log en discord e inicialización de arrays y variables
@@ -43,6 +45,9 @@ client.on('message', function(message) {
         case '.cute':
             sendImageMessage(message, imagesCute, CuteDir, '<@' + message.author.id + '> here is your cute ', client);
             break;
+        case '.loli':
+            sendImageMessage(message, imagesLoli, LoliDir, '<@' + message.author.id + '> here is your loli ', client);
+            break;
         case '.aeri' :
             sendTextMessage(message, "The reason of my name is because my creator @Dani#6143 loves this name and its also cute in korean (애리) and Japanese(あえり) （＾3＾）~♪", client);
             break;
@@ -68,25 +73,18 @@ client.on('ready', () => {
 // INICIALIZA LOS ARRAYS QUE CONTIENEN LAS RUTAS DE LAS IMÁGENES
 function imagesLoad() {
     var fs = require('fs');
-    fs.readdir('./images/cute/',function(err,files){
-    if(err) throw err;
-    files.forEach(function(file){
-        console.log(file);
-        imagesCute.push(file);  
-    });
-    console.log(imagesCute.length)
- });
-}
-
-// INICIALIZA LOS ARRAYS QUE CONTIENEN LAS RUTAS DE LAS IMÁGENES
-function imagesLoad() {
-    var fs = require('fs');
     fs.readdir(CuteDir,function(err,files){
-    if(err) throw err;
-    files.forEach(function(file){
-        imagesCute.push(file);  
+        if(err) throw err;
+        files.forEach(function(file){
+            imagesCute.push(file);  
+        });
     });
- });
+    fs.readdir(LoliDir,function(err,files){
+        if(err) throw err;
+        files.forEach(function(file){
+            imagesLoli.push(file);  
+        });
+    });
 }
 
 function sendTextMessage(message, message_body, client){
