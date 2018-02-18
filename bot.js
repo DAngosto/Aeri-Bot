@@ -43,10 +43,13 @@ client.on('message', function(message) {
 
     switch (message.content){
         case '.cute':
-            sendImageMessage(message, imagesCute, CuteDir, '<@' + message.author.id + '> here is your cute ', client);
+            sendImageMessage(message, imagesCute, CuteDir, '<@' + message.author.id + '> here is your cute image ', client);
             break;
         case '.loli':
             sendImageMessage(message, imagesLoli, LoliDir, '<@' + message.author.id + '> here is your loli ', client);
+            break;
+        case '.invite':
+            sendTextMessage(message, environment.inviteMessage, client);
             break;
         case '.aeri' :
             sendTextMessage(message, "The reason of my name is because my creator @Dani#6143 loves this name and its also cute in korean (애리) and Japanese(あえり) （＾3＾）~♪", client);

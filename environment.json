@@ -1,3 +1,4 @@
 {
-    "helpMessage": " hey yo!*(^o^)*  this is the current command list:\r\n\t • .cute = Gives you a random cute image ★.★\r\n\t • .loli = Gives you a random loli image.\r\n\t • .aeri = Gives you the reason of my name.\r\n\t • .help = Gives you a reply with all the commands available."
+    "helpMessage": " Hey yo!*(^o^)*  this is the current command list:\r\n\t • .cute = Gives you a random cute image ★.★\r\n\t • .loli = Gives you a random loli image.\r\n\t • .aeri = Gives you the reason of my name.\r\n\t • .invite = Gives you the invite URL so you can add Aeri to your own discord server.\r\n\t • .help = Gives you a reply with all the commands available.",
+    "inviteMessage": " This is my invite URL, please share it with your friends so i can have more too! ♡´･ᴗ･`♡ \t\thttps://discordapp.com/oauth2/authorize?&client_id=414503649910325248&scope=bot&permissions=0"
 }
