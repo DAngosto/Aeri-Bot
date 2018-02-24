@@ -18,12 +18,12 @@ const LoliDir = '../../Imagenes/Loli/';
 
 
 // Log en discord e inicialización de arrays y variables
-const Discord = require('discordv8');
+const Discord = require('discord.js');
 const music = require('discord.js-music-v11');
 var client = new Discord.Client();
 var environment = require('./environment.json');
 
-client.loginWithToken(auth.token, output);
+client.login(auth.token);
 function output(error, token) {
         if (error) {
                 console.log(`There was an error logging in: ${error}`);
@@ -40,12 +40,12 @@ client.on('message', function(message) {
     if (message.channel.isPrivate) {
             console.log(`(Private) ${message.author.name}: ${message.content}`);
     } else {
-            console.log(`(${message.server.name} / ${message.channel.name}) ${message.author.name}: ${message.content}`);
+            console.log(`(${message.guild.name} / ${message.channel.name}) ${message.author.name}: ${message.content}`);
     }
     //if (!message.guild) return;
 
     switch (message.content){
-        case '.cute':
+        case '-cute':
             sendImageMessage(message, imagesCute, CuteDir, '<@' + message.author.id + '> here is your cute image ', client);
             break;
         case '.loli':
@@ -57,15 +57,15 @@ client.on('message', function(message) {
         //console.log(message.author.voiceChannel.id);
         
             
-            const channel = message.author.voiceChannel;
+            const voiceChannel = message.member.voiceChannel;
 /*
             channel.join()
             .then(connection => console.log('Connected!'))
             .catch(console.error);
         */
             // Only try to join the sender's voice channel if they are in one themselves
-            if (channel) {
-                connectVoiceChannel(channel,  message);
+            if (voiceChannel) {
+                connectVoiceChannel(voiceChannel,  message);
 
                  /*
                 channel.join()
@@ -134,7 +134,7 @@ function imagesLoad() {
 function sendTextMessage(message, message_body, client){
     console.log("entro a la funcion text");
     console.log(message_body);
-    client.reply(message, message_body);
+    //client.reply(message, message_body);
 }
 
 // prepara una respuesta con imagen ante un determinado comando
@@ -147,21 +147,43 @@ function sendImageMessage(message, pic_list, pic_dir, message_body, client){
     var pic_index = Math.floor(Math.random() * pic_list.length);
     var pic_name = pic_list[pic_index];
     var pic = pic_dir + pic_name;
+
+    attachment = new Discord.Attachment(pic, pic_name);
+    attachments.push(attachment);
+    message.channel.send(message_body, {'files': attachments});
+    //message.sendFile(message,)
+    //client.sendFile(message,)
+    /*
     client.sendFile(message, pic_dir + pic_name, pic_name, message_body, (err, m) => {
         if (err) console.log(err);
     });
+    */
 }
 
-function connectVoiceChannel(channel, message){
-    channel.join()
-                .then(connection => {
+function connectVoiceChannel(voiceChannel, message){
+
+
+    voiceChannel.join().then(connection => {
+
+        connection.playFile('F:/Memes/Audios/Do you know the way.mp3').on("end", () => {
+            message.member.voiceChannel.leave();
+        });
+
+    });
+    /*
+    
+    
+   voiceChannel.join().then(connection => {
                     message.reply('I have successfully connected to the channel!');
                     //music(client);
                     //music.play('F:/Memes/Audios/Do you know the way.mp3');
                     connection.playFile('F:/Memes/Audios/Do you know the way.mp3');
+                    message.member.voiceChannel.leave();
+                }).catch(console.error);
 
-                })
-                .catch(console.error);
+    //desconectarse();
+    */
+    
   
 }
 
