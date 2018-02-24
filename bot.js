@@ -19,6 +19,7 @@ const LoliDir = '../../Imagenes/Loli/';
 
 // Log en discord e inicialización de arrays y variables
 const Discord = require('discordv8');
+const music = require('discord.js-music-v11');
 var client = new Discord.Client();
 var environment = require('./environment.json');
 
@@ -33,6 +34,7 @@ function output(error, token) {
 imagesLoad();
 
 
+
 // Tratamiento de los mensajes
 client.on('message', function(message) {
     if (message.channel.isPrivate) {
@@ -40,6 +42,7 @@ client.on('message', function(message) {
     } else {
             console.log(`(${message.server.name} / ${message.channel.name}) ${message.author.name}: ${message.content}`);
     }
+    //if (!message.guild) return;
 
     switch (message.content){
         case '.cute':
@@ -47,6 +50,43 @@ client.on('message', function(message) {
             break;
         case '.loli':
             sendImageMessage(message, imagesLoli, LoliDir, '<@' + message.author.id + '> here is your loli ', client);
+            break;
+        case '.meme':
+
+        //console.log(message.author.typing);
+        //console.log(message.author.voiceChannel.id);
+        
+            
+            const channel = message.author.voiceChannel;
+/*
+            channel.join()
+            .then(connection => console.log('Connected!'))
+            .catch(console.error);
+        */
+            // Only try to join the sender's voice channel if they are in one themselves
+            if (channel) {
+                connectVoiceChannel(channel,  message);
+
+                 /*
+                channel.join()
+                .then(connection => message.reply('I have successfully connected to the channel!'))
+                .catch(console.error);
+
+               
+                message.member.voiceChannel.join()
+                .then(connection => { // Connection is an instance of VoiceConnection
+                    message.reply('I have successfully connected to the channel!');
+                })
+                .catch(console.log);
+                */
+               
+                //client.disconnect();
+                //channel.disconnect();
+                
+            } else {
+                sendTextMessage(message, "No estas en el canal de voz, Baka!", client);
+            }
+            
             break;
         case '.invite':
             sendTextMessage(message, environment.inviteMessage, client);
@@ -90,13 +130,14 @@ function imagesLoad() {
     });
 }
 
+// prepara una respuesta con solo texto ante un determinado comando
 function sendTextMessage(message, message_body, client){
     console.log("entro a la funcion text");
     console.log(message_body);
     client.reply(message, message_body);
 }
 
-// prepara la respuesta a enviar ante un determinado comando
+// prepara una respuesta con imagen ante un determinado comando
 function sendImageMessage(message, pic_list, pic_dir, message_body, client){
 
     var fs = require('fs');
@@ -111,6 +152,20 @@ function sendImageMessage(message, pic_list, pic_dir, message_body, client){
     });
 }
 
+function connectVoiceChannel(channel, message){
+    channel.join()
+                .then(connection => {
+                    message.reply('I have successfully connected to the channel!');
+                    //music(client);
+                    //music.play('F:/Memes/Audios/Do you know the way.mp3');
+                    connection.playFile('F:/Memes/Audios/Do you know the way.mp3');
+
+                })
+                .catch(console.error);
+  
+}
+
+// descoenctar el bot de discord
 function desconectarse(){
 client.logOut((err) => {
     console.log(err);
