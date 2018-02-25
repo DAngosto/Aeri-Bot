@@ -35,6 +35,12 @@ imagesLoad();
 
 
 
+var HashMap = require('hashmap');
+
+var activeAudios = new HashMap();
+
+
+
 // Tratamiento de los mensajes
 client.on('message', function(message) {
     if (message.channel.isPrivate) {
@@ -42,7 +48,7 @@ client.on('message', function(message) {
     } else {
             console.log(`(${message.guild.name} / ${message.channel.name}) ${message.author.name}: ${message.content}`);
     }
-    //if (!message.guild) return;
+    if (!message.guild) return;
 
     switch (message.content){
         case '-cute':
@@ -51,48 +57,39 @@ client.on('message', function(message) {
         case '.loli':
             sendImageMessage(message, imagesLoli, LoliDir, '<@' + message.author.id + '> here is your loli ', client);
             break;
-        case '.meme':
-
-        //console.log(message.author.typing);
-        //console.log(message.author.voiceChannel.id);
-        
-            
-            const voiceChannel = message.member.voiceChannel;
-/*
-            channel.join()
-            .then(connection => console.log('Connected!'))
-            .catch(console.error);
-        */
-            // Only try to join the sender's voice channel if they are in one themselves
+        case '.memes':
+            sendTextMessage(message, environment.memeListMessage);
+            break;
+        case '.way':
+            var voiceChannel = message.member.voiceChannel;
             if (voiceChannel) {
-                connectVoiceChannel(voiceChannel,  message);
-
-                 /*
-                channel.join()
-                .then(connection => message.reply('I have successfully connected to the channel!'))
-                .catch(console.error);
-
-               
-                message.member.voiceChannel.join()
-                .then(connection => { // Connection is an instance of VoiceConnection
-                    message.reply('I have successfully connected to the channel!');
-                })
-                .catch(console.log);
-                */
-               
-                //client.disconnect();
-                //channel.disconnect();
-                
+                connectVoiceChannel(voiceChannel,  message, 'F:/Memes/Audios/do you know the way.mp3');
             } else {
-                sendTextMessage(message, "No estas en el canal de voz, Baka!", client);
+                sendTextMessage(message, "No estas en ningún canal de voz, Baka!");
             }
-            
+            break;
+        case '.noob':
+            var voiceChannel = message.member.voiceChannel;
+            if (voiceChannel) {
+                connectVoiceChannel(voiceChannel,  message, 'F:/Memes/Audios/noob.mp3');                    
+            } else {
+                sendTextMessage(message, "No estas en el canal de voz, Baka!");
+            }
+            break;
+        case '.stop':
+            if (activeAudios.get(message.guild.name)){
+                activeAudios.get(message.guild.name).end();
+                activeAudios.delete(message.guild.name);
+            }
+            else {
+                sendTextMessage(message, "No hay sonando nada");
+            }
             break;
         case '.invite':
-            sendTextMessage(message, environment.inviteMessage, client);
+            sendTextMessage(message, environment.inviteMessage);
             break;
         case '.aeri' :
-            sendTextMessage(message, "The reason of my name is because my creator @Dani#6143 loves this name and its also cute in korean (애리) and Japanese(あえり) （＾3＾）~♪", client);
+            sendTextMessage(message, "The reason of my name is because my creator @Dani#6143 loves this name and its also cute in korean (애리) and Japanese(あえり) （＾3＾）~♪");
             break;
         case '.help':
             sendTextMessage(message, environment.helpMessage, client);
@@ -131,10 +128,8 @@ function imagesLoad() {
 }
 
 // prepara una respuesta con solo texto ante un determinado comando
-function sendTextMessage(message, message_body, client){
-    console.log("entro a la funcion text");
-    console.log(message_body);
-    //client.reply(message, message_body);
+function sendTextMessage(message, message_body){
+    message.channel.send(message_body);
 }
 
 // prepara una respuesta con imagen ante un determinado comando
@@ -151,38 +146,27 @@ function sendImageMessage(message, pic_list, pic_dir, message_body, client){
     attachment = new Discord.Attachment(pic, pic_name);
     attachments.push(attachment);
     message.channel.send(message_body, {'files': attachments});
-    //message.sendFile(message,)
-    //client.sendFile(message,)
-    /*
-    client.sendFile(message, pic_dir + pic_name, pic_name, message_body, (err, m) => {
-        if (err) console.log(err);
-    });
-    */
 }
 
-function connectVoiceChannel(voiceChannel, message){
+function connectVoiceChannel(voiceChannel, message, file){
 
 
     voiceChannel.join().then(connection => {
+        var dispatcher = connection.playFile(file);
+        activeAudios.set(message.guild.name,dispatcher);
 
-        connection.playFile('F:/Memes/Audios/Do you know the way.mp3').on("end", () => {
+        dispatcher.on("end", () => {
             message.member.voiceChannel.leave();
+            activeAudios.delete(message.guild.name);
+            
         });
 
-    });
-    /*
-    
-    
-   voiceChannel.join().then(connection => {
-                    message.reply('I have successfully connected to the channel!');
-                    //music(client);
-                    //music.play('F:/Memes/Audios/Do you know the way.mp3');
-                    connection.playFile('F:/Memes/Audios/Do you know the way.mp3');
-                    message.member.voiceChannel.leave();
-                }).catch(console.error);
+        dispatcher.on('error', e => {
+            console.log(e);
+          });
 
-    //desconectarse();
-    */
+
+    });
     
   
 }
