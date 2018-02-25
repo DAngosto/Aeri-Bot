@@ -8,13 +8,19 @@ logger.add(logger.transports.Console, {
 logger.level = 'debug';
 
 
+// Rutas de los directorios de las imagenes
+const CuteDir = '../../Imagenes/Cute/';
+const LoliDir = '../../Imagenes/Loli/';
+const KpopDir = '../..//Musica/Kpop/';
+
 // IMAGES ARRAYS
 var imagesCute = []; 
 var imagesLoli = []; 
 
-// Rutas de los directorios de las imagenes
-const CuteDir = '../../Imagenes/Cute/';
-const LoliDir = '../../Imagenes/Loli/';
+// AUDIO ARRAYS
+var audioKpop = []; 
+
+
 
 
 // Log en discord e inicialización de arrays y variables
@@ -31,12 +37,11 @@ function output(error, token) {
         } else
                 console.log(`Logged in.`);
 }
-imagesLoad();
+initialLoad();
 
 
-
+// hashmap de conexiones de voz, servidor-dispatcher
 var HashMap = require('hashmap');
-
 var activeAudios = new HashMap();
 
 
@@ -44,9 +49,9 @@ var activeAudios = new HashMap();
 // Tratamiento de los mensajes
 client.on('message', function(message) {
     if (message.channel.isPrivate) {
-            console.log(`(Private) ${message.author.name}: ${message.content}`);
+            console.log(`(Private) ${message.member.name}: ${message.content}`);
     } else {
-            console.log(`(${message.guild.name} / ${message.channel.name}) ${message.author.name}: ${message.content}`);
+            console.log(`(${message.guild.name} / ${message.channel.name}) ${message.member.name}: ${message.content}`);
     }
     if (!message.guild) return;
 
@@ -61,20 +66,16 @@ client.on('message', function(message) {
             sendTextMessage(message, environment.memeListMessage);
             break;
         case '.way':
-            var voiceChannel = message.member.voiceChannel;
-            if (voiceChannel) {
-                connectVoiceChannel(voiceChannel,  message, 'F:/Memes/Audios/do you know the way.mp3');
-            } else {
-                sendTextMessage(message, "No estas en ningún canal de voz, Baka!");
-            }
+                sendAudioMeme(message, 'F:/Memes/Audios/do you know the way.mp3');
+           
             break;
         case '.noob':
-            var voiceChannel = message.member.voiceChannel;
-            if (voiceChannel) {
-                connectVoiceChannel(voiceChannel,  message, 'F:/Memes/Audios/noob.mp3');                    
-            } else {
-                sendTextMessage(message, "No estas en el canal de voz, Baka!");
-            }
+            
+            sendAudioMeme(message, 'F:/Memes/Audios/noob.mp3');                    
+            break;
+        case '.kpop':
+
+            sendRandomSong(message, audioKpop, KpopDir);
             break;
         case '.stop':
             if (activeAudios.get(message.guild.name)){
@@ -89,10 +90,10 @@ client.on('message', function(message) {
             sendTextMessage(message, environment.inviteMessage);
             break;
         case '.aeri' :
-            sendTextMessage(message, "The reason of my name is because my creator @Dani#6143 loves this name and its also cute in korean (애리) and Japanese(あえり) （＾3＾）~♪");
+            sendTextMessage(message, environment.reasonMessage);
             break;
         case '.help':
-            sendTextMessage(message, environment.helpMessage, client);
+            sendTextMessage(message, environment.helpMessage);
             break;
     }
     
@@ -111,7 +112,7 @@ client.on('ready', () => {
 
 
 // INICIALIZA LOS ARRAYS QUE CONTIENEN LAS RUTAS DE LAS IMÁGENES
-function imagesLoad() {
+function initialLoad() {
     var fs = require('fs');
     fs.readdir(CuteDir,function(err,files){
         if(err) throw err;
@@ -123,6 +124,12 @@ function imagesLoad() {
         if(err) throw err;
         files.forEach(function(file){
             imagesLoli.push(file);  
+        });
+    });
+    fs.readdir(KpopDir,function(err,files){
+        if(err) throw err;
+        files.forEach(function(file){
+            audioKpop.push(file);  
         });
     });
 }
@@ -148,28 +155,77 @@ function sendImageMessage(message, pic_list, pic_dir, message_body, client){
     message.channel.send(message_body, {'files': attachments});
 }
 
-function connectVoiceChannel(voiceChannel, message, file){
+function sendAudioMeme(message, file){
 
+    var voiceChannel = message.member.voiceChannel;
 
-    voiceChannel.join().then(connection => {
-        var dispatcher = connection.playFile(file);
-        activeAudios.set(message.guild.name,dispatcher);
-
-        dispatcher.on("end", () => {
-            message.member.voiceChannel.leave();
-            activeAudios.delete(message.guild.name);
-            
+    if (voiceChannel) {
+        voiceChannel.join().then(connection => {
+            var dispatcher = connection.playFile(file);
+            dispatcher.setVolume(0.1);
+            activeAudios.set(message.guild.name,dispatcher);
+    
+            dispatcher.on("end", () => {
+                message.member.voiceChannel.leave();
+                activeAudios.delete(message.guild.name);
+                
+            });
+    
+            dispatcher.on('error', e => {
+                console.log(e);
+              });
+    
+    
         });
+    }
+    else {
+    sendTextMessage(message, "No estas en el canal de voz, Baka!");
+    }
 
-        dispatcher.on('error', e => {
-            console.log(e);
-          });
-
-
-    });
+    
     
   
 }
+
+function sendRandomSong(message, audioList, audioDir){
+
+    var audio_index = Math.floor(Math.random() * audioList.length);
+    var audio_name = audioList[audio_index];
+    var audio = audioDir + audio_name;
+    
+    var voiceChannel = message.member.voiceChannel;
+    if (voiceChannel) {
+
+        voiceChannel.join().then(connection => {
+            var dispatcher = connection.playFile(audio);
+            dispatcher.setVolume(0.1);
+            activeAudios.set(message.guild.name,dispatcher);
+    
+            dispatcher.on("end", () => {
+                message.member.voiceChannel.leave();
+                activeAudios.delete(message.guild.name);
+                
+            });
+    
+            dispatcher.on('error', e => {
+                console.log(e);
+              });
+    
+    
+        });
+        sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4));                   
+    } else {
+        sendTextMessage(message, "No estas en el canal de voz, Baka!");
+    }
+
+    
+    
+    
+  
+}
+
+
+
 
 // descoenctar el bot de discord
 function desconectarse(){
