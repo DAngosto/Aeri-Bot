@@ -67,15 +67,30 @@ client.on('message', function(message) {
             break;
         case '.way':
                 sendAudioMeme(message, 'F:/Memes/Audios/do you know the way.mp3');
-           
             break;
         case '.noob':
-            
             sendAudioMeme(message, 'F:/Memes/Audios/noob.mp3');                    
             break;
+        case '.cono':
+            sendAudioMeme(message, 'F:/Memes/Audios/cono.mp3');                    
+            break;
         case '.kpop':
-
-            sendRandomSong(message, audioKpop, KpopDir);
+            sendRandomSong(message, audioKpop, KpopDir, 0);
+            break;
+        case '.kpopi':
+            sendRandomSong(message, audioKpop, KpopDir, 1);
+            break;
+        case '.subnormal':
+            sendAudioMeme(message, 'F:/Memes/Audios/Baka.mp3');
+            sendTextMessage(message, "Are you trying to disrespect me? Bakaaaaaa o(；△；)o");
+            break;
+        case '.tonto':
+            sendAudioMeme(message, 'F:/Memes/Audios/Baka.mp3');
+            sendTextMessage(message, "Are you trying to disrespect me? Bakaaaaaa o(；△；)o");
+            break;
+        case '.retrasado':
+            sendAudioMeme(message, 'F:/Memes/Audios/Baka.mp3');
+            sendTextMessage(message, "Are you trying to disrespect me? Bakaaaaaa o(；△；)o");
             break;
         case '.stop':
             if (activeAudios.get(message.guild.name)){
@@ -162,7 +177,7 @@ function sendAudioMeme(message, file){
     if (voiceChannel) {
         voiceChannel.join().then(connection => {
             var dispatcher = connection.playFile(file);
-            dispatcher.setVolume(0.1);
+            dispatcher.setVolume(1);
             activeAudios.set(message.guild.name,dispatcher);
     
             dispatcher.on("end", () => {
@@ -187,40 +202,45 @@ function sendAudioMeme(message, file){
   
 }
 
-function sendRandomSong(message, audioList, audioDir){
+//type=0 no infinite, =1 infinite
+function sendRandomSong(message, audioList, audioDir, type){
 
     var audio_index = Math.floor(Math.random() * audioList.length);
     var audio_name = audioList[audio_index];
     var audio = audioDir + audio_name;
-    
     var voiceChannel = message.member.voiceChannel;
-    if (voiceChannel) {
 
+    if (voiceChannel) {
         voiceChannel.join().then(connection => {
-            var dispatcher = connection.playFile(audio);
-            dispatcher.setVolume(0.1);
-            activeAudios.set(message.guild.name,dispatcher);
+                var dispatcher = connection.playFile(audio);
+                dispatcher.setVolume(0.1);
+                activeAudios.set(message.guild.name,dispatcher);
     
-            dispatcher.on("end", () => {
-                message.member.voiceChannel.leave();
-                activeAudios.delete(message.guild.name);
-                
-            });
+                dispatcher.on("end", () => {
+                    
+                    activeAudios.delete(message.guild.name);
+                    if (type==1){
+                        audio_index = Math.floor(Math.random() * audioList.length);
+                        audio_name = audioList[audio_index];
+                        audio = audioDir + audio_name;
+                        dispatcher = connection.playFile(audio);
+                        sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4)); 
+                        activeAudios.set(message.guild.name,dispatcher);
+                    }
+                    else {
+                        message.member.voiceChannel.leave();
+                    }
+                });
     
-            dispatcher.on('error', e => {
-                console.log(e);
-              });
-    
-    
-        });
-        sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4));                   
+                dispatcher.on('error', e => {
+                    console.log(e);
+                });
+                sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4));    
+           
+        });               
     } else {
         sendTextMessage(message, "No estas en el canal de voz, Baka!");
     }
-
-    
-    
-    
   
 }
 
