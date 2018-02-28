@@ -1,6 +1,7 @@
 {
     "reasonMessage": "The reason of my name is because my creator @Dani#6143 loves this name and its also cute in korean (애리) and Japanese(あえり) （＾3＾）~♪",
-    "helpMessage": " Hey yo!*(^o^)*  this is the current command list:\r\n\t • .cute = Gives you a random cute image ★.★\r\n\t • .loli = Gives you a random loli image.\r\n\t • .aeri = Gives you the reason of my name.\r\n\t • .invite = Gives you the invite URL so you can add Aeri to your own discord server.\r\n\t • .help = Gives you a reply with all the commands available.",
+    "helpMessage": " Hey yo!*(^o^)*  this is the current command list:\r\n\t • .cute = Gives you a random cute image ★.★\r\n\t • .loli = Gives you a random loli image.\r\n\t • .memes = Gives you the list of fresh audio memes available.\r\n\t • .kpop = Plays a random kpop song.\r\n\t • .kpopi = Plays random kpop songs infinitely or until you do .stop command.\r\n\t • .skip = Skip the current song playing.\r\n\t • .stop = Finish the current song playing.\r\n\t • .pause = Pause the current song playing.\r\n\t • .resume = Resume the song that was being played.\r\n\t • .volume (number) = Change the current volume level. Accept X or X.X numbers\r\n\t • .aeri = Gives you the reason of my name. ԅ( ˘ω˘ԅ)\r\n\t • .invite = Gives you the invite URL so you can add Aeri to your own discord server.\r\n\t • .help = Gives you a reply with all the commands available.\r\n\t • There are also a few easter egg commands. Try to find them, Goodluck! ㅇㅅㅇ",
     "inviteMessage": " This is my invite URL, please share it with your friends so i can have more too! ♡´･ᴗ･`♡ \t\thttps://discordapp.com/oauth2/authorize?&client_id=414503649910325248&scope=bot&permissions=0",
-    "memeListMessage": " Here is the list of the fresh memes available:\r\n\t • .way\r\n\t • .noob "
+    "memeListMessage": " Here is the list of the fresh memes available:\r\n\t • .way\r\n\t • .noob\r\n\t • .cono "
 }
+

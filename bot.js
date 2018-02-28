@@ -40,6 +40,82 @@ function output(error, token) {
 }
 initialLoad();
 
+function VoiceChannelElements() {
+
+    
+    var dispatcher;
+    var connectionToVoiceChannel;
+    var type;
+    var audioList;
+    var audioDir;
+
+
+    //Setters
+    function setDispatcher(newDispatcher) {
+       if (!newDispatcher) 
+          throw new Error('errro dispatcher');
+          dispatcher = newDispatcher;
+    }
+
+    function setConnectionToVoiceChannel(newVoiceConnection) {
+        if (!newVoiceConnection) 
+           throw new Error('error connection');
+           connectionToVoiceChannel = newVoiceConnection;
+    }
+
+    function setType(newType) {
+           type = newType;
+     }
+
+     function setAudioList(newAudioList) {
+        if (!newAudioList) 
+           throw new Error('error newAudioList');
+           audioList = newAudioList;
+     }
+
+     function setAudioDir(newAudioDir) {
+        if (!newAudioDir) 
+           throw new Error('error newAudioDir');
+           audioDir = newAudioDir;
+     }
+
+     //Getters
+    function getDispatcher() {
+       return dispatcher;
+    }
+
+    function getConnectionToVoiceChannel() {
+        return connectionToVoiceChannel;
+     }
+    
+     function getType() {
+        return type;
+     }
+
+     function getAudioList() {
+        return audioList;
+     }
+
+     function getAudioDir() {
+        return audioDir;
+     }
+
+
+    return {
+       setDispatcher: setDispatcher,
+       setConnectionToVoiceChannel: setConnectionToVoiceChannel,
+       setType: setType,
+       setAudioList: setAudioList,
+       setAudioDir: setAudioDir,
+       getDispatcher: getDispatcher,
+       getConnectionToVoiceChannel: getConnectionToVoiceChannel,
+       getType: getType,
+       getAudioList: getAudioList,
+       getAudioDir: getAudioDir
+    }; 
+    
+ } 
+
 
 // hashmap de conexiones de voz, servidor-dispatcher
 var HashMap = require('hashmap');
@@ -52,7 +128,7 @@ client.on('message', function(message) {
     if (message.channel.isPrivate) {
             console.log(`(Private) ${message.member.name}: ${message.content}`);
     } else {
-            console.log(`(${message.guild.name} / ${message.channel.name}) ${message.member.name}: ${message.content}`);
+            console.log(`(${message.guild.name} / ${message.channel.name}) ${message.member.user.username + '#' + message.member.user.discriminator}: ${message.content}`);
     }
     if (!message.guild) return;
 
@@ -97,12 +173,20 @@ client.on('message', function(message) {
             sendAudioMeme(message, 'F:/Memes/Audios/Baka.mp3');
             sendTextMessage(message, "Are you trying to disrespect me? Bakaaaaaa o(；△；)o");
             break;
+        case '.skip':
+            skipAudio(message, audioKpop, KpopDir);
+            break;
         case '.stop':
             stopAudio(message);
             break;
+        case '.pause':
+            pauseAudio(message);
+            break;
+        case '.resume':
+            resumeAudio(message);
+            break;
         case '.volume':
             if (!isNaN(messageSplitted[1])){
-                console.log("Entro al primer if");
                 setAudioVolume(message, math.round(messageSplitted[1], 1));
             }
             else {
@@ -186,7 +270,11 @@ function sendAudioMeme(message, file){
         voiceChannel.join().then(connection => {
             var dispatcher = connection.playFile(file);
             dispatcher.setVolume(1);
-            activeAudios.set(message.guild.name,dispatcher);
+
+            var aux = VoiceChannelElements();
+            aux.setDispatcher(dispatcher);
+            aux.setConnectionToVoiceChannel(connection);
+            activeAudios.set(message.guild.name, aux);
     
             dispatcher.on("end", () => {
                 message.member.voiceChannel.leave();
@@ -220,9 +308,22 @@ function sendRandomSong(message, audioList, audioDir, type){
 
     if (voiceChannel) {
         voiceChannel.join().then(connection => {
+
                 var dispatcher = connection.playFile(audio);
                 dispatcher.setVolume(0.1);
-                activeAudios.set(message.guild.name,dispatcher);
+
+
+                var aux = VoiceChannelElements();
+                aux.setDispatcher(dispatcher);
+                aux.setConnectionToVoiceChannel(connection);
+                aux.setType(type);
+                aux.setAudioList(audioList);
+                aux.setAudioDir(audioDir);
+
+                
+
+                activeAudios.set(message.guild.name, aux);
+
                 sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4));  
 
                 dispatcher.on("end", () => {
@@ -232,8 +333,10 @@ function sendRandomSong(message, audioList, audioDir, type){
                         audio_name = audioList[audio_index];
                         audio = audioDir + audio_name;
                         dispatcher = connection.playFile(audio);
+                        aux.setDispatcher(dispatcher);
                         sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4)); 
-                        activeAudios.set(message.guild.name,dispatcher);
+
+                        activeAudios.set(message.guild.name,aux);
                     }
                     else {
                         message.member.voiceChannel.leave();
@@ -251,40 +354,104 @@ function sendRandomSong(message, audioList, audioDir, type){
   
 }
 
+function skipAudio(message){
+    if (activeAudios.get(message.guild.name)){
+        var aux = activeAudios.get(message.guild.name);
+        stopAudio(message);
+        sendRandomSong(message, aux.getAudioList(), aux.getAudioDir());
+    }
+    else {
+            sendTextMessage(message, "No hay sonando nada");
+        }
+
+        
+/*
+        var audio_index = Math.floor(Math.random() * audioList.length);
+        var audio_name = audioList[audio_index];
+        var audio = audioDir + audio_name;
+        
+        var aux = activeAudios.get(message.guild.name);
+
+        activeAudios.delete(message.guild.name);
+
+        
+        //aux.getDispatcher().pause();
+
+        aux.getConnectionToVoiceChannel().playFile(audio);
+
+        /*
+
+        var newDispatcher = aux.getConnectionToVoiceChannel().playFile(audio);
+        aux.setDispatcher(newDispatcher);
+
+        activeAudios.set(message.guild.name, aux);
+        */
+/*
+        newDispatcher.on("end", () => {
+            
+            activeAudios.delete(message.guild.name);
+            if (aux.getType==1){
+                audio_index = Math.floor(Math.random() * audioList.length);
+                audio_name = audioList[audio_index];
+                audio = audioDir + audio_name;
+                newDispatcher = aux.getConnectionToVoiceChannel().playFile(audio);
+                sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4)); 
+                activeAudios.set(message.guild.name, aux);
+            }
+            else {
+                message.member.voiceChannel.leave();
+            }
+            
+           
+        });
+
+        newDispatcher.on('error', e => {
+            console.log(e);
+        });  
+
+        */
+       //console.log("parado");
+    
+
+}
+
 function stopAudio(message){
 
     if (activeAudios.get(message.guild.name)){
-        activeAudios.get(message.guild.name).end();
+        activeAudios.get(message.guild.name).getDispatcher().end();
         activeAudios.delete(message.guild.name);
     }
     else {
         sendTextMessage(message, "No hay sonando nada");
     }
-
 }
 
-function setAudioVolume(message, volume){
+function pauseAudio(message){
     if (activeAudios.get(message.guild.name)){
-        activeAudios.get(message.guild.name).setVolume(volume);
+        activeAudios.get(message.guild.name).getDispatcher().pause();
     }
     else {
         sendTextMessage(message, "No hay sonando nada");
     }
 }
 
-
-function isNumeric(cadena){
-	try {
-		parseFloat(cadena);
-		return true;
-	} catch(error) {
-        console.log(error);
-        return false;
+function resumeAudio(message){
+    if (activeAudios.get(message.guild.name)){
+        activeAudios.get(message.guild.name).getDispatcher().resume();
+    }
+    else {
+        sendTextMessage(message, "No hay sonando nada");
     }
 }
 
-
-
+function setAudioVolume(message, volume){
+    if (activeAudios.get(message.guild.name)){
+        activeAudios.get(message.guild.name).getDispatcher().setVolume(volume);
+    }
+    else {
+        sendTextMessage(message, "No hay sonando nada");
+    }
+}
 
 
 
