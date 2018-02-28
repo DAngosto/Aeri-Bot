@@ -25,9 +25,10 @@ var audioKpop = [];
 
 // Log en discord e inicialización de arrays y variables
 const Discord = require('discord.js');
-const music = require('discord.js-music-v11');
 var client = new Discord.Client();
 var environment = require('./environment.json');
+const math = require('mathjs');
+
 
 client.login(auth.token);
 function output(error, token) {
@@ -55,8 +56,12 @@ client.on('message', function(message) {
     }
     if (!message.guild) return;
 
-    switch (message.content){
-        case '-cute':
+    var messageSplitted = message.content.split(" ");
+    var command = messageSplitted[0];
+
+
+    switch (command){
+        case '.cute':
             sendImageMessage(message, imagesCute, CuteDir, '<@' + message.author.id + '> here is your cute image ', client);
             break;
         case '.loli':
@@ -93,12 +98,15 @@ client.on('message', function(message) {
             sendTextMessage(message, "Are you trying to disrespect me? Bakaaaaaa o(；△；)o");
             break;
         case '.stop':
-            if (activeAudios.get(message.guild.name)){
-                activeAudios.get(message.guild.name).end();
-                activeAudios.delete(message.guild.name);
+            stopAudio(message);
+            break;
+        case '.volume':
+            if (!isNaN(messageSplitted[1])){
+                console.log("Entro al primer if");
+                setAudioVolume(message, math.round(messageSplitted[1], 1));
             }
             else {
-                sendTextMessage(message, "No hay sonando nada");
+                sendTextMessage(message, "Introduce un valor númerico, estupido.");
             }
             break;
         case '.invite':
@@ -215,9 +223,9 @@ function sendRandomSong(message, audioList, audioDir, type){
                 var dispatcher = connection.playFile(audio);
                 dispatcher.setVolume(0.1);
                 activeAudios.set(message.guild.name,dispatcher);
-    
+                sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4));  
+
                 dispatcher.on("end", () => {
-                    
                     activeAudios.delete(message.guild.name);
                     if (type==1){
                         audio_index = Math.floor(Math.random() * audioList.length);
@@ -234,8 +242,7 @@ function sendRandomSong(message, audioList, audioDir, type){
     
                 dispatcher.on('error', e => {
                     console.log(e);
-                });
-                sendTextMessage(message, "current song: " + audio_name.substr(0,audio_name.length - 4));    
+                });  
            
         });               
     } else {
@@ -243,6 +250,40 @@ function sendRandomSong(message, audioList, audioDir, type){
     }
   
 }
+
+function stopAudio(message){
+
+    if (activeAudios.get(message.guild.name)){
+        activeAudios.get(message.guild.name).end();
+        activeAudios.delete(message.guild.name);
+    }
+    else {
+        sendTextMessage(message, "No hay sonando nada");
+    }
+
+}
+
+function setAudioVolume(message, volume){
+    if (activeAudios.get(message.guild.name)){
+        activeAudios.get(message.guild.name).setVolume(volume);
+    }
+    else {
+        sendTextMessage(message, "No hay sonando nada");
+    }
+}
+
+
+function isNumeric(cadena){
+	try {
+		parseFloat(cadena);
+		return true;
+	} catch(error) {
+        console.log(error);
+        return false;
+    }
+}
+
+
 
 
 
